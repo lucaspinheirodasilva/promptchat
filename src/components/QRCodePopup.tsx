@@ -5,8 +5,7 @@ import {
   Dialog, 
   DialogContent, 
   DialogTitle, 
-  DialogHeader,
-  DialogClose 
+  DialogHeader
 } from "@/components/ui/dialog";
 
 type QRCodePopupProps = {
@@ -37,10 +36,6 @@ const QRCodePopup = ({ isOpen, onClose }: QRCodePopupProps) => {
           <DialogTitle className="text-center text-xl font-semibold text-primary">
             Conectar WhatsApp
           </DialogTitle>
-          <DialogClose className="absolute right-4 top-4" onClick={onClose}>
-            <X className="h-4 w-4" />
-            <span className="sr-only">Fechar</span>
-          </DialogClose>
         </DialogHeader>
         <div className="flex flex-col items-center justify-center p-6">
           {isLoading ? (

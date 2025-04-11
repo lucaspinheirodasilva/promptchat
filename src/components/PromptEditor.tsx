@@ -1,9 +1,10 @@
 
 import { useState } from 'react';
-import { Send, Save, Trash2 } from 'lucide-react';
+import { Send, Save, Trash2, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogTitle, DialogClose } from '@/components/ui/dialog';
 
 type PromptEditorProps = {
   tutorialUrl?: string;
@@ -13,6 +14,7 @@ type PromptEditorProps = {
 
 const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => {
   const { toast } = useToast();
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const handleSubmit = () => {
     if (!prompt.trim()) {
@@ -59,15 +61,17 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
     <div className="h-full flex flex-col">
       {tutorialUrl && (
         <div className="p-4 bg-muted rounded-lg mb-4">
-          <h3 className="text-sm font-medium mb-2">Tutorial</h3>
-          <div className="aspect-video w-full bg-black rounded-lg overflow-hidden">
-            <iframe
-              src={tutorialUrl}
-              className="w-full h-full"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
+          <div className="flex justify-between items-center">
+            <h3 className="text-sm font-medium">Tutorial</h3>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setShowTutorial(true)}
+              className="flex items-center gap-1"
+            >
+              <Play className="h-3.5 w-3.5" />
+              Ver Tutorial
+            </Button>
           </div>
         </div>
       )}
@@ -114,6 +118,24 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
           </Button>
         </div>
       </div>
+
+      {/* Tutorial Dialog */}
+      {tutorialUrl && (
+        <Dialog open={showTutorial} onOpenChange={setShowTutorial}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogTitle>Tutorial</DialogTitle>
+            <div className="aspect-video w-full bg-black rounded-lg overflow-hidden">
+              <iframe
+                src={tutorialUrl}
+                className="w-full h-full"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
