@@ -95,7 +95,7 @@ const PromptExamples = ({ onSelectPrompt }: PromptExamplesProps) => {
           />
         </div>
       </div>
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 p-4 h-[calc(100vh-150px)]">
         <div className="space-y-4">
           {filteredPrompts.map((prompt) => (
             <div 

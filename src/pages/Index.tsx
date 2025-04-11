@@ -21,8 +21,12 @@ const Index = () => {
       <MiniHeader onTutorialAdded={handleTutorialAdded} />
       
       <div className="flex flex-1 overflow-hidden h-[calc(100vh-50px)]">
-        <div className="flex-1 p-4 overflow-y-auto max-w-3xl">
-          <PromptEditor tutorialUrl={tutorialUrl} />
+        <div className="flex-1 p-4 overflow-hidden max-w-3xl">
+          <PromptEditor 
+            tutorialUrl={tutorialUrl} 
+            prompt={promptText}
+            setPrompt={setPromptText}
+          />
         </div>
         
         <div className="w-80 flex-shrink-0">

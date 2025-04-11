@@ -7,10 +7,11 @@ import { useToast } from '@/hooks/use-toast';
 
 type PromptEditorProps = {
   tutorialUrl?: string;
+  prompt: string;
+  setPrompt: (prompt: string) => void;
 };
 
-const PromptEditor = ({ tutorialUrl }: PromptEditorProps) => {
-  const [prompt, setPrompt] = useState('');
+const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => {
   const { toast } = useToast();
 
   const handleSubmit = () => {
@@ -98,7 +99,7 @@ const PromptEditor = ({ tutorialUrl }: PromptEditorProps) => {
         
         <Textarea
           placeholder="Digite seu prompt aqui..."
-          className="flex-1 resize-none text-base p-4"
+          className="flex-1 min-h-[300px] max-h-[300px] overflow-y-auto resize-none text-base p-4"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
         />
