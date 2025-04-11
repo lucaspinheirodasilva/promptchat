@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Link2, Link, Video, QrCode } from 'lucide-react';
+import { Link2, Video, QrCode, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,10 @@ const MiniHeader = ({ onTutorialAdded }: MiniHeaderProps) => {
 
   const handleDisconnect = () => {
     setIsConnected(false);
+  };
+
+  const handleReconnect = () => {
+    setShowQRCode(true);
   };
 
   const handleQRCodeClose = () => {
@@ -47,15 +51,26 @@ const MiniHeader = ({ onTutorialAdded }: MiniHeaderProps) => {
         </div>
         <div className="flex items-center space-x-3">
           {isConnected ? (
-            <Button 
-              onClick={handleDisconnect} 
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1 text-red-500 border-red-200 hover:bg-red-50"
-            >
-              <Link2 className="h-4 w-4" />
-              Desconectar
-            </Button>
+            <>
+              <Button 
+                onClick={handleReconnect} 
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1 text-primary border-primary/20 hover:bg-primary/10"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Reconectar
+              </Button>
+              <Button 
+                onClick={handleDisconnect} 
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1 text-red-500 border-red-200 hover:bg-red-50"
+              >
+                <Link2 className="h-4 w-4" />
+                Desconectar
+              </Button>
+            </>
           ) : (
             <Button 
               onClick={handleConnect} 

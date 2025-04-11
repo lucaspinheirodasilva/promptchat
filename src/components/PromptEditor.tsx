@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Send, RefreshCw, Trash2 } from 'lucide-react';
+import { Send, Save, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
@@ -36,8 +36,22 @@ const PromptEditor = ({ tutorialUrl }: PromptEditorProps) => {
     setPrompt('');
   };
 
-  const handleReset = () => {
-    setPrompt('Você é um assistente virtual da Chatify, ajude o usuário com respostas claras e objetivas.');
+  const handleSaveDraft = () => {
+    if (!prompt.trim()) {
+      toast({
+        title: "Prompt vazio",
+        description: "Nada para salvar como rascunho.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    toast({
+      title: "Rascunho salvo!",
+      description: "Seu rascunho foi salvo com sucesso.",
+    });
+    
+    console.log('Rascunho salvo:', prompt);
   };
 
   return (
@@ -64,11 +78,11 @@ const PromptEditor = ({ tutorialUrl }: PromptEditorProps) => {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleReset}
+              onClick={handleSaveDraft}
               className="flex items-center gap-1"
             >
-              <RefreshCw className="h-3.5 w-3.5" />
-              Restaurar
+              <Save className="h-3.5 w-3.5" />
+              Salvar Rascunho
             </Button>
             <Button
               variant="outline"

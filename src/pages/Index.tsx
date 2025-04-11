@@ -17,15 +17,15 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-white max-w-6xl mx-auto shadow-lg">
       <MiniHeader onTutorialAdded={handleTutorialAdded} />
       
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 p-6 overflow-auto">
+      <div className="flex flex-1 overflow-hidden h-[calc(100vh-50px)]">
+        <div className="flex-1 p-4 overflow-y-auto max-w-3xl">
           <PromptEditor tutorialUrl={tutorialUrl} />
         </div>
         
-        <div className="w-1/3 max-w-md">
+        <div className="w-80 flex-shrink-0">
           <PromptExamples onSelectPrompt={handleSelectPrompt} />
         </div>
       </div>
