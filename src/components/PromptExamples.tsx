@@ -82,8 +82,8 @@ const PromptExamples = ({ onSelectPrompt }: PromptExamplesProps) => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-white border-l border-gray-200">
-      <div className="p-4 border-b border-gray-200">
+    <div className="w-full h-full flex flex-col bg-white border-l border-gray-200 overflow-hidden">
+      <div className="p-4 border-b border-gray-200 flex-shrink-0">
         <h2 className="text-lg font-semibold text-primary mb-2">Exemplos de Prompts</h2>
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -95,7 +95,7 @@ const PromptExamples = ({ onSelectPrompt }: PromptExamplesProps) => {
           />
         </div>
       </div>
-      <ScrollArea className="flex-1 overflow-auto" style={{ height: "calc(100vh - 170px)" }}>
+      <ScrollArea className="flex-1">
         <div className="space-y-4 p-4">
           {filteredPrompts.map((prompt) => (
             <div 

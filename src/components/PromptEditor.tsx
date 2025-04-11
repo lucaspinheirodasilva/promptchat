@@ -4,7 +4,8 @@ import { Send, Save, Trash2, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogTitle, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type PromptEditorProps = {
   tutorialUrl?: string;
@@ -76,7 +77,7 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
         </div>
       )}
       
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-primary">Editor de Prompt</h2>
           <div className="flex space-x-2">
@@ -101,12 +102,16 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
           </div>
         </div>
         
-        <Textarea
-          placeholder="Digite seu prompt aqui..."
-          className="flex-1 min-h-[300px] max-h-[300px] overflow-y-auto resize-none text-base p-4"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-        />
+        <div className="relative flex-1 overflow-hidden">
+          <ScrollArea className="absolute inset-0">
+            <Textarea
+              placeholder="Digite seu prompt aqui..."
+              className="min-h-full w-full resize-none text-base p-4 border-0 focus-visible:ring-0"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+            />
+          </ScrollArea>
+        </div>
         
         <div className="mt-4 flex justify-end">
           <Button
