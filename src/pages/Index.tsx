@@ -31,7 +31,8 @@ const Index = () => {
           />
         </div>
         
-        <div className={`${isMobile ? 'h-1/3' : 'h-full'} w-full md:w-80 flex-shrink-0 overflow-hidden order-1 md:order-2`}>
+        {/* Adjusted for better mobile view */}
+        <div className={`${isMobile ? 'h-96' : 'h-full'} w-full md:w-80 flex-shrink-0 overflow-hidden order-1 md:order-2`}>
           <PromptExamples onSelectPrompt={handleSelectPrompt} />
         </div>
       </div>
