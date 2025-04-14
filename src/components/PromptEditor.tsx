@@ -1,12 +1,11 @@
-
-import { useState, useEffect } from 'react';
-import { Send, Save, Trash2, Play } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Send, Save, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import TutorialDialog from './TutorialDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
+import TutorialDialog from './TutorialDialog';
 
 type PromptEditorProps = {
   tutorialUrl?: string;
@@ -16,24 +15,15 @@ type PromptEditorProps = {
 
 const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => {
   const { toast } = useToast();
-  const [showTutorial, setShowTutorial] = useState(false);
   const isMobile = useIsMobile();
-  const [formattedPrompt, setFormattedPrompt] = useState('');
+  const editorRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [showTutorial, setShowTutorial] = useState(false);
 
-  useEffect(() => {
-    // Highlight URLs in the prompt
-    if (prompt) {
-      // URL regex pattern
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      const formattedText = prompt.replace(
-        urlRegex,
-        '<span class="font-bold text-primary">$1</span>'
-      );
-      setFormattedPrompt(formattedText);
-    } else {
-      setFormattedPrompt('');
-    }
-  }, [prompt]);
+  // Handle content formatting and editing
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPrompt(e.target.value);
+  };
 
   const handleSubmit = () => {
     if (!prompt.trim()) {
@@ -56,6 +46,9 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
 
   const handleClear = () => {
     setPrompt('');
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
   };
 
   const handleSaveDraft = () => {
@@ -75,6 +68,74 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
     
     console.log('Rascunho salvo:', prompt);
   };
+
+  // Format text with highlighted URLs, without using dangerouslySetInnerHTML
+  const getFormattedContent = () => {
+    if (!prompt) return null;
+    
+    // Match URLs with various common domain extensions
+    const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[^\s]+\.(com|net|org|io|co|app|dev|ai|br|us|eu|uk|gov|edu)(\.[a-z]{2,})?)/gi;
+    
+    const parts = prompt.split(urlRegex);
+    const matches = prompt.match(urlRegex) || [];
+    
+    // Interlace text parts with URL spans
+    const formatted = [];
+    let matchIndex = 0;
+    
+    for (let i = 0; i < parts.length; i++) {
+      if (parts[i]) {
+        formatted.push(<span key={`text-${i}`}>{parts[i]}</span>);
+      }
+      
+      if (matchIndex < matches.length && (i === 0 || i < parts.length - 1)) {
+        formatted.push(
+          <span key={`url-${matchIndex}`} className="font-bold text-primary">
+            {matches[matchIndex]}
+          </span>
+        );
+        matchIndex++;
+      }
+    }
+    
+    return formatted;
+  };
+
+  // Focus the textarea when the editor is clicked
+  const handleEditorClick = () => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  };
+
+  // Keep the textarea in sync with editor scrolling
+  useEffect(() => {
+    const syncScroll = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (editorRef.current && textareaRef.current) {
+        if (target === editorRef.current) {
+          textareaRef.current.scrollTop = editorRef.current.scrollTop;
+        } else if (target === textareaRef.current) {
+          editorRef.current.scrollTop = textareaRef.current.scrollTop;
+        }
+      }
+    };
+
+    const editorElement = editorRef.current;
+    const textareaElement = textareaRef.current;
+
+    if (editorElement && textareaElement) {
+      editorElement.addEventListener('scroll', syncScroll);
+      textareaElement.addEventListener('scroll', syncScroll);
+    }
+
+    return () => {
+      if (editorElement && textareaElement) {
+        editorElement.removeEventListener('scroll', syncScroll);
+        textareaElement.removeEventListener('scroll', syncScroll);
+      }
+    };
+  }, []);
 
   return (
     <div className="h-full flex flex-col">
@@ -103,27 +164,29 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
           </div>
         </div>
         
-        <div className="relative flex-1 overflow-hidden">
-          <ScrollArea className="absolute inset-0">
-            {formattedPrompt ? (
-              <div 
-                className="min-h-full w-full resize-none text-base p-4 focus:outline-none"
-                dangerouslySetInnerHTML={{ __html: formattedPrompt }}
-                onClick={() => {
-                  // When clicking on the formatted text area, focus on the hidden textarea
-                  const textarea = document.getElementById('prompt-textarea');
-                  if (textarea) {
-                    (textarea as HTMLTextAreaElement).focus();
-                  }
-                }}
-              />
-            ) : null}
-            <Textarea
+        <div className="relative flex-1 overflow-hidden border rounded-md">
+          <ScrollArea className="absolute inset-0 overflow-auto">
+            <div 
+              ref={editorRef}
+              className="min-h-full w-full p-4 font-mono whitespace-pre-wrap break-words"
+              onClick={handleEditorClick}
+              style={{ caretColor: 'transparent' }}
+            >
+              {getFormattedContent()}
+              {/* Ensure visible cursor when empty */}
+              {!prompt && (
+                <span className="cursor text-gray-400">|</span>
+              )}
+            </div>
+            
+            <textarea
+              ref={textareaRef}
               id="prompt-textarea"
               placeholder="Digite seu prompt aqui..."
-              className={`min-h-full w-full resize-none text-base p-4 border-0 focus-visible:ring-0 ${formattedPrompt ? 'absolute opacity-0 top-0 left-0 h-full' : ''}`}
+              className="absolute top-0 left-0 w-full h-full resize-none text-base p-4 border-0 bg-transparent text-transparent caret-black selection:bg-blue-200 focus-visible:ring-0 focus:outline-none"
               value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
+              onChange={handleTextChange}
+              style={{ caretColor: 'black' }}
             />
           </ScrollArea>
         </div>
