@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Search } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -57,6 +57,7 @@ type PromptExamplesProps = {
 const PromptExamples = ({ onSelectPrompt }: PromptExamplesProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredPrompts, setFilteredPrompts] = useState(examplePrompts);
+  const [expandedMobile, setExpandedMobile] = useState(false);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -74,49 +75,94 @@ const PromptExamples = ({ onSelectPrompt }: PromptExamplesProps) => {
 
   const handleUsePrompt = (content: string) => {
     onSelectPrompt(content);
+    // On mobile, collapse the examples panel after selecting
+    if (isMobile) {
+      setExpandedMobile(false);
+    }
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-white border-l border-gray-200 overflow-hidden">
+    <div className={`w-full h-full flex flex-col bg-white border-l border-gray-200 overflow-hidden ${isMobile ? 'border-b' : ''}`}>
       <div className="p-4 border-b border-gray-200 flex-shrink-0">
-        <h2 className="text-lg font-semibold text-primary mb-2">Exemplos de Prompts</h2>
-        <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
-          <Input
-            placeholder="Buscar prompts..."
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
-      <ScrollArea className="flex-1">
-        <div className="space-y-4 p-4">
-          {filteredPrompts.map((prompt) => (
-            <div 
-              key={prompt.id} 
-              className="border border-gray-200 rounded-lg p-3 hover:border-primary/50 transition-colors"
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-primary">Exemplos de Prompts</h2>
+          {isMobile && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setExpandedMobile(!expandedMobile)}
+              className="p-1"
             >
-              <h3 className="font-medium text-sm text-gray-900 mb-1">{prompt.title}</h3>
-              <p className="text-xs text-gray-500 line-clamp-2 mb-2">{prompt.content}</p>
+              {expandedMobile ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            </Button>
+          )}
+        </div>
+        
+        {/* Search is always visible for desktop, but conditionally for mobile */}
+        {(!isMobile || expandedMobile) && (
+          <div className="relative mt-2">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <Input
+              placeholder="Buscar prompts..."
+              className="pl-8"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        )}
+      </div>
+      
+      {/* Show examples based on screen size and expanded state */}
+      {(!isMobile || expandedMobile) ? (
+        <ScrollArea className={`flex-1 ${isMobile && expandedMobile ? 'h-64' : ''}`}>
+          <div className="space-y-4 p-4">
+            {filteredPrompts.map((prompt) => (
+              <div 
+                key={prompt.id} 
+                className="border border-gray-200 rounded-lg p-3 hover:border-primary/50 transition-colors"
+              >
+                <h3 className="font-medium text-sm text-gray-900 mb-1">{prompt.title}</h3>
+                <p className="text-xs text-gray-500 line-clamp-2 mb-2">{prompt.content}</p>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="w-full text-xs"
+                  onClick={() => handleUsePrompt(prompt.content)}
+                >
+                  {isMobile ? "Usar" : "Usar este prompt"}
+                </Button>
+              </div>
+            ))}
+            
+            {filteredPrompts.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <p>Nenhum prompt encontrado com "{searchTerm}"</p>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      ) : (
+        // On mobile when collapsed, show just the first example to indicate there are more
+        <div className="p-2">
+          {filteredPrompts.length > 0 && (
+            <div className="border border-gray-200 rounded-lg p-3 hover:border-primary/50 transition-colors">
+              <h3 className="font-medium text-sm text-gray-900 mb-1">{filteredPrompts[0].title}</h3>
+              <p className="text-xs text-gray-500 line-clamp-2 mb-2">{filteredPrompts[0].content}</p>
               <Button 
                 size="sm" 
                 variant="outline"
                 className="w-full text-xs"
-                onClick={() => handleUsePrompt(prompt.content)}
+                onClick={() => handleUsePrompt(filteredPrompts[0].content)}
               >
-                {isMobile ? "Usar" : "Usar este prompt"}
+                Usar
               </Button>
             </div>
-          ))}
-          
-          {filteredPrompts.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <p>Nenhum prompt encontrado com "{searchTerm}"</p>
-            </div>
           )}
+          <div className="text-center mt-1 text-xs text-muted-foreground">
+            <p>Toque para ver mais exemplos ↓</p>
+          </div>
         </div>
-      </ScrollArea>
+      )}
     </div>
   );
 };

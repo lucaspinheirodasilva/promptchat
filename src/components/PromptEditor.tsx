@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { Send, Save, Trash2, Bold, Italic, Link } from 'lucide-react';
+import { Send, Save, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
@@ -48,7 +48,7 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
     }
   };
 
-  // Focus when prompt changes
+  // Focus when prompt changes or component loads
   useEffect(() => {
     focusTextarea();
   }, [prompt]);
@@ -95,73 +95,12 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
     console.log('Rascunho salvo:', prompt);
   };
 
-  const handleFormatText = (format: 'bold' | 'italic' | 'link') => {
-    if (!textareaRef.current) return;
-    
-    const textarea = textareaRef.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = prompt.substring(start, end);
-    
-    let newText = prompt;
-    
-    switch (format) {
-      case 'bold':
-        newText = prompt.substring(0, start) + `**${selectedText}**` + prompt.substring(end);
-        break;
-      case 'italic':
-        newText = prompt.substring(0, start) + `*${selectedText}*` + prompt.substring(end);
-        break;
-      case 'link':
-        newText = prompt.substring(0, start) + `[${selectedText}](url)` + prompt.substring(end);
-        break;
-    }
-    
-    setPrompt(newText);
-    
-    // Refocus and reposition cursor
-    setTimeout(() => {
-      textarea.focus();
-      const newPosition = end + (format === 'bold' ? 4 : format === 'italic' ? 2 : 7);
-      textarea.setSelectionRange(newPosition, newPosition);
-    }, 0);
-  };
-
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         <div className="mb-2 flex items-center justify-between flex-wrap gap-2">
           <h2 className="text-lg font-semibold text-primary">Editor de Prompt</h2>
           <div className="flex items-center space-x-1 flex-wrap gap-1">
-            <div className="flex space-x-1 mr-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleFormatText('bold')}
-                className="h-8 w-8 p-0"
-                title="Negrito"
-              >
-                <Bold className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleFormatText('italic')}
-                className="h-8 w-8 p-0"
-                title="Itálico"
-              >
-                <Italic className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleFormatText('link')}
-                className="h-8 w-8 p-0"
-                title="Link"
-              >
-                <Link className="h-3.5 w-3.5" />
-              </Button>
-            </div>
             <Button
               variant="outline"
               size="sm"
@@ -187,7 +126,7 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
           <ScrollArea className="absolute inset-0">
             {formattedPrompt ? (
               <div 
-                className="min-h-full w-full resize-none text-base p-4 focus:outline-none"
+                className="min-h-full w-full resize-none text-base p-4 focus:outline-none cursor-text"
                 dangerouslySetInnerHTML={{ __html: formattedPrompt }}
                 onClick={focusTextarea}
               />
@@ -205,6 +144,16 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
                   textareaRef.current.style.caretColor = 'black';
                 }
               }}
+              onMouseDown={() => {
+                // Make sure to focus on mouse down for better UX
+                focusTextarea();
+              }}
+              onClick={(e) => {
+                // Prevent bubbling to ensure textarea gets focus
+                e.stopPropagation();
+                focusTextarea();
+              }}
+              autoFocus
             />
           </ScrollArea>
         </div>

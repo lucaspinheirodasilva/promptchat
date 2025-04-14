@@ -22,8 +22,16 @@ const Index = () => {
     <div className="h-screen w-full flex flex-col bg-white shadow-lg overflow-hidden">
       <MiniHeader onTutorialAdded={handleTutorialAdded} tutorialUrl={tutorialUrl} />
       
-      <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
-        <div className="flex-1 p-4 overflow-hidden order-2 md:order-1">
+      <div className="flex flex-1 overflow-hidden flex-col">
+        {/* Mobile Layout - Show examples preview first, then editor */}
+        {isMobile && (
+          <div className="h-40 overflow-hidden">
+            <PromptExamples onSelectPrompt={handleSelectPrompt} />
+          </div>
+        )}
+        
+        {/* Prompt Editor - Always visible */}
+        <div className="flex-1 p-4 overflow-hidden">
           <PromptEditor 
             tutorialUrl={tutorialUrl} 
             prompt={promptText}
@@ -31,10 +39,12 @@ const Index = () => {
           />
         </div>
         
-        {/* Adjusted for better mobile view */}
-        <div className={`${isMobile ? 'h-96' : 'h-full'} w-full md:w-80 flex-shrink-0 overflow-hidden order-1 md:order-2`}>
-          <PromptExamples onSelectPrompt={handleSelectPrompt} />
-        </div>
+        {/* Desktop Layout - Show examples sidebar */}
+        {!isMobile && (
+          <div className="w-80 h-full flex-shrink-0 absolute top-16 right-0 overflow-hidden">
+            <PromptExamples onSelectPrompt={handleSelectPrompt} />
+          </div>
+        )}
       </div>
     </div>
   );
