@@ -1,6 +1,6 @@
 
-import { useState, useEffect, useRef } from 'react';
-import { Send, Save, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Send, Save, Trash2, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
@@ -19,38 +19,20 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
   const [showTutorial, setShowTutorial] = useState(false);
   const isMobile = useIsMobile();
   const [formattedPrompt, setFormattedPrompt] = useState('');
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    // Highlight various URL formats in the prompt
+    // Highlight URLs in the prompt
     if (prompt) {
-      // Enhanced URL regex pattern that matches common TLDs
-      const urlRegex = /(https?:\/\/[^\s]+)|(\b(?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.(?:com|net|org|edu|gov|mil|io|co|ai|app|dev|me|info|biz|tv|online|store|blog|site|tech|xyz|design|studio|website|page|cloud|digital|live|pro|world|network|club|us|uk|eu|ca|au|br|jp|ru|in|cn|fr|de|it|nl|es|com\.br)[^\s]*\b)/gi;
-      
+      // URL regex pattern
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
       const formattedText = prompt.replace(
         urlRegex,
-        '<span class="font-bold text-primary">$&</span>'
+        '<span class="font-bold text-primary">$1</span>'
       );
       setFormattedPrompt(formattedText);
     } else {
       setFormattedPrompt('');
     }
-  }, [prompt]);
-
-  // Function to focus on textarea
-  const focusTextarea = () => {
-    if (textareaRef.current) {
-      textareaRef.current.focus();
-      
-      // Set cursor at the end of text
-      const length = textareaRef.current.value.length;
-      textareaRef.current.setSelectionRange(length, length);
-    }
-  };
-
-  // Focus when prompt changes or component loads
-  useEffect(() => {
-    focusTextarea();
   }, [prompt]);
 
   const handleSubmit = () => {
@@ -74,7 +56,6 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
 
   const handleClear = () => {
     setPrompt('');
-    setTimeout(focusTextarea, 0);
   };
 
   const handleSaveDraft = () => {
@@ -100,7 +81,7 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         <div className="mb-2 flex items-center justify-between flex-wrap gap-2">
           <h2 className="text-lg font-semibold text-primary">Editor de Prompt</h2>
-          <div className="flex items-center space-x-1 flex-wrap gap-1">
+          <div className="flex space-x-2 flex-wrap gap-2">
             <Button
               variant="outline"
               size="sm"
@@ -126,34 +107,23 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
           <ScrollArea className="absolute inset-0">
             {formattedPrompt ? (
               <div 
-                className="min-h-full w-full resize-none text-base p-4 focus:outline-none cursor-text"
+                className="min-h-full w-full resize-none text-base p-4 focus:outline-none"
                 dangerouslySetInnerHTML={{ __html: formattedPrompt }}
-                onClick={focusTextarea}
+                onClick={() => {
+                  // When clicking on the formatted text area, focus on the hidden textarea
+                  const textarea = document.getElementById('prompt-textarea');
+                  if (textarea) {
+                    (textarea as HTMLTextAreaElement).focus();
+                  }
+                }}
               />
             ) : null}
             <Textarea
               id="prompt-textarea"
-              ref={textareaRef}
               placeholder="Digite seu prompt aqui..."
               className={`min-h-full w-full resize-none text-base p-4 border-0 focus-visible:ring-0 ${formattedPrompt ? 'absolute opacity-0 top-0 left-0 h-full' : ''}`}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              onFocus={() => {
-                // Ensure cursor is visible - fake caret if needed
-                if (textareaRef.current) {
-                  textareaRef.current.style.caretColor = 'black';
-                }
-              }}
-              onMouseDown={() => {
-                // Make sure to focus on mouse down for better UX
-                focusTextarea();
-              }}
-              onClick={(e) => {
-                // Prevent bubbling to ensure textarea gets focus
-                e.stopPropagation();
-                focusTextarea();
-              }}
-              autoFocus
             />
           </ScrollArea>
         </div>
