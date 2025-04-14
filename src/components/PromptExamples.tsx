@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Search, ChevronLeft } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -52,17 +52,9 @@ const examplePrompts = [
 
 type PromptExamplesProps = {
   onSelectPrompt: (prompt: string) => void;
-  limitDisplay?: number;
-  showCollapseButton?: boolean;
-  onCollapse?: () => void;
 };
 
-const PromptExamples = ({ 
-  onSelectPrompt,
-  limitDisplay,
-  showCollapseButton = false,
-  onCollapse
-}: PromptExamplesProps) => {
+const PromptExamples = ({ onSelectPrompt }: PromptExamplesProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredPrompts, setFilteredPrompts] = useState(examplePrompts);
   const isMobile = useIsMobile();
@@ -84,24 +76,8 @@ const PromptExamples = ({
     onSelectPrompt(content);
   };
 
-  const displayPrompts = limitDisplay ? filteredPrompts.slice(0, limitDisplay) : filteredPrompts;
-
   return (
     <div className="w-full h-full flex flex-col bg-white border-l border-gray-200 overflow-hidden">
-      {showCollapseButton && (
-        <div className="p-2 border-b border-gray-200 flex-shrink-0">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onCollapse}
-            className="w-full justify-start"
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Voltar para o editor
-          </Button>
-        </div>
-      )}
-      
       <div className="p-4 border-b border-gray-200 flex-shrink-0">
         <h2 className="text-lg font-semibold text-primary mb-2">Exemplos de Prompts</h2>
         <div className="relative">
@@ -114,10 +90,9 @@ const PromptExamples = ({
           />
         </div>
       </div>
-      
-      {limitDisplay ? (
+      <ScrollArea className="flex-1">
         <div className="space-y-4 p-4">
-          {displayPrompts.map((prompt) => (
+          {filteredPrompts.map((prompt) => (
             <div 
               key={prompt.id} 
               className="border border-gray-200 rounded-lg p-3 hover:border-primary/50 transition-colors"
@@ -134,36 +109,14 @@ const PromptExamples = ({
               </Button>
             </div>
           ))}
+          
+          {filteredPrompts.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              <p>Nenhum prompt encontrado com "{searchTerm}"</p>
+            </div>
+          )}
         </div>
-      ) : (
-        <ScrollArea className="flex-1">
-          <div className="space-y-4 p-4">
-            {filteredPrompts.map((prompt) => (
-              <div 
-                key={prompt.id} 
-                className="border border-gray-200 rounded-lg p-3 hover:border-primary/50 transition-colors"
-              >
-                <h3 className="font-medium text-sm text-gray-900 mb-1">{prompt.title}</h3>
-                <p className="text-xs text-gray-500 line-clamp-2 mb-2">{prompt.content}</p>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  className="w-full text-xs"
-                  onClick={() => handleUsePrompt(prompt.content)}
-                >
-                  {isMobile ? "Usar" : "Usar este prompt"}
-                </Button>
-              </div>
-            ))}
-            
-            {filteredPrompts.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                <p>Nenhum prompt encontrado com "{searchTerm}"</p>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
-      )}
+      </ScrollArea>
     </div>
   );
 };
