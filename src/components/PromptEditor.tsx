@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Send, Save, Trash2, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,6 +18,22 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
   const { toast } = useToast();
   const [showTutorial, setShowTutorial] = useState(false);
   const isMobile = useIsMobile();
+  const [formattedPrompt, setFormattedPrompt] = useState('');
+
+  useEffect(() => {
+    // Highlight URLs in the prompt
+    if (prompt) {
+      // URL regex pattern
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const formattedText = prompt.replace(
+        urlRegex,
+        '<span class="font-bold text-primary">$1</span>'
+      );
+      setFormattedPrompt(formattedText);
+    } else {
+      setFormattedPrompt('');
+    }
+  }, [prompt]);
 
   const handleSubmit = () => {
     if (!prompt.trim()) {
@@ -62,23 +78,6 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
 
   return (
     <div className="h-full flex flex-col">
-      {tutorialUrl && (
-        <div className="p-4 bg-muted rounded-lg mb-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-sm font-medium">Tutorial</h3>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setShowTutorial(true)}
-              className="flex items-center gap-1"
-            >
-              <Play className="h-3.5 w-3.5" />
-              Ver Tutorial
-            </Button>
-          </div>
-        </div>
-      )}
-      
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         <div className="mb-2 flex items-center justify-between flex-wrap gap-2">
           <h2 className="text-lg font-semibold text-primary">Editor de Prompt</h2>
@@ -106,9 +105,23 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
         
         <div className="relative flex-1 overflow-hidden">
           <ScrollArea className="absolute inset-0">
+            {formattedPrompt ? (
+              <div 
+                className="min-h-full w-full resize-none text-base p-4 focus:outline-none"
+                dangerouslySetInnerHTML={{ __html: formattedPrompt }}
+                onClick={() => {
+                  // When clicking on the formatted text area, focus on the hidden textarea
+                  const textarea = document.getElementById('prompt-textarea');
+                  if (textarea) {
+                    (textarea as HTMLTextAreaElement).focus();
+                  }
+                }}
+              />
+            ) : null}
             <Textarea
+              id="prompt-textarea"
               placeholder="Digite seu prompt aqui..."
-              className="min-h-full w-full resize-none text-base p-4 border-0 focus-visible:ring-0"
+              className={`min-h-full w-full resize-none text-base p-4 border-0 focus-visible:ring-0 ${formattedPrompt ? 'absolute opacity-0 top-0 left-0 h-full' : ''}`}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
             />
