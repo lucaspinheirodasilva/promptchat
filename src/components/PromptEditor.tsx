@@ -4,8 +4,9 @@ import { Send, Save, Trash2, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import TutorialDialog from './TutorialDialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type PromptEditorProps = {
   tutorialUrl?: string;
@@ -16,6 +17,7 @@ type PromptEditorProps = {
 const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => {
   const { toast } = useToast();
   const [showTutorial, setShowTutorial] = useState(false);
+  const isMobile = useIsMobile();
 
   const handleSubmit = () => {
     if (!prompt.trim()) {
@@ -78,9 +80,9 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
       )}
       
       <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <div className="mb-2 flex items-center justify-between">
+        <div className="mb-2 flex items-center justify-between flex-wrap gap-2">
           <h2 className="text-lg font-semibold text-primary">Editor de Prompt</h2>
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 flex-wrap gap-2">
             <Button
               variant="outline"
               size="sm"
@@ -88,7 +90,7 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
               className="flex items-center gap-1"
             >
               <Save className="h-3.5 w-3.5" />
-              Salvar Rascunho
+              {!isMobile && "Salvar Rascunho"}
             </Button>
             <Button
               variant="outline"
@@ -97,7 +99,7 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
               className="flex items-center gap-1 text-destructive border-destructive/20 hover:bg-destructive/10"
             >
               <Trash2 className="h-3.5 w-3.5" />
-              Limpar
+              {!isMobile && "Limpar"}
             </Button>
           </div>
         </div>
@@ -126,20 +128,11 @@ const PromptEditor = ({ tutorialUrl, prompt, setPrompt }: PromptEditorProps) => 
 
       {/* Tutorial Dialog */}
       {tutorialUrl && (
-        <Dialog open={showTutorial} onOpenChange={setShowTutorial}>
-          <DialogContent className="sm:max-w-lg">
-            <DialogTitle>Tutorial</DialogTitle>
-            <div className="aspect-video w-full bg-black rounded-lg overflow-hidden">
-              <iframe
-                src={tutorialUrl}
-                className="w-full h-full"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <TutorialDialog 
+          isOpen={showTutorial} 
+          onClose={() => setShowTutorial(false)} 
+          videoUrl={tutorialUrl}
+        />
       )}
     </div>
   );

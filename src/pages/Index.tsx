@@ -3,10 +3,12 @@ import { useState } from 'react';
 import MiniHeader from '@/components/MiniHeader';
 import PromptEditor from '@/components/PromptEditor';
 import PromptExamples from '@/components/PromptExamples';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
   const [promptText, setPromptText] = useState('');
-  const [tutorialUrl, setTutorialUrl] = useState('');
+  const [tutorialUrl, setTutorialUrl] = useState('https://www.youtube.com/watch?v=V__8y5qx4Wg');
+  const isMobile = useIsMobile();
 
   const handleSelectPrompt = (prompt: string) => {
     setPromptText(prompt);
@@ -18,10 +20,10 @@ const Index = () => {
 
   return (
     <div className="h-screen w-full flex flex-col bg-white shadow-lg overflow-hidden">
-      <MiniHeader onTutorialAdded={handleTutorialAdded} />
+      <MiniHeader onTutorialAdded={handleTutorialAdded} tutorialUrl={tutorialUrl} />
       
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 p-4 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
+        <div className="flex-1 p-4 overflow-hidden order-2 md:order-1">
           <PromptEditor 
             tutorialUrl={tutorialUrl} 
             prompt={promptText}
@@ -29,7 +31,7 @@ const Index = () => {
           />
         </div>
         
-        <div className="w-80 flex-shrink-0 h-full overflow-hidden">
+        <div className={`${isMobile ? 'h-1/3' : 'h-full'} w-full md:w-80 flex-shrink-0 overflow-hidden order-1 md:order-2`}>
           <PromptExamples onSelectPrompt={handleSelectPrompt} />
         </div>
       </div>

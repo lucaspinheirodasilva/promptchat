@@ -5,15 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
 import QRCodePopup from './QRCodePopup';
+import TutorialDialog from './TutorialDialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type MiniHeaderProps = {
   onTutorialAdded: (url: string) => void;
+  tutorialUrl: string;
 };
 
-const MiniHeader = ({ onTutorialAdded }: MiniHeaderProps) => {
+const MiniHeader = ({ onTutorialAdded, tutorialUrl }: MiniHeaderProps) => {
   const [isConnected, setIsConnected] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
   const [videoUrl, setVideoUrl] = useState('');
+  const isMobile = useIsMobile();
 
   const handleConnect = () => {
     setShowQRCode(true);
@@ -42,14 +47,14 @@ const MiniHeader = ({ onTutorialAdded }: MiniHeaderProps) => {
 
   return (
     <div className="w-full bg-white border-b border-gray-200 py-2 px-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center space-x-2">
           <h1 className="text-lg font-medium text-primary">
             <span className="mr-1 font-bold">Chatify</span>
             Prompt Builder
           </h1>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 flex-wrap gap-2">
           {isConnected ? (
             <>
               <Button 
@@ -59,7 +64,7 @@ const MiniHeader = ({ onTutorialAdded }: MiniHeaderProps) => {
                 className="flex items-center gap-1 text-primary border-primary/20 hover:bg-primary/10"
               >
                 <RefreshCw className="h-4 w-4" />
-                Reconectar
+                {!isMobile && "Reconectar"}
               </Button>
               <Button 
                 onClick={handleDisconnect} 
@@ -68,7 +73,7 @@ const MiniHeader = ({ onTutorialAdded }: MiniHeaderProps) => {
                 className="flex items-center gap-1 text-red-500 border-red-200 hover:bg-red-50"
               >
                 <Link2 className="h-4 w-4" />
-                Desconectar
+                {!isMobile && "Desconectar"}
               </Button>
             </>
           ) : (
@@ -79,7 +84,7 @@ const MiniHeader = ({ onTutorialAdded }: MiniHeaderProps) => {
               className="flex items-center gap-1 text-primary border-primary/20 hover:bg-primary/10"
             >
               <QrCode className="h-4 w-4" />
-              Conectar WhatsApp
+              {!isMobile && "Conectar WhatsApp"}
             </Button>
           )}
 
@@ -89,9 +94,10 @@ const MiniHeader = ({ onTutorialAdded }: MiniHeaderProps) => {
                 variant="outline"
                 size="sm"
                 className="flex items-center gap-1 text-secondary border-secondary/20 hover:bg-secondary/10"
+                onClick={() => setShowTutorial(true)}
               >
                 <Video className="h-4 w-4" />
-                Tutorial
+                {!isMobile && "Tutorial"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80">
@@ -118,6 +124,7 @@ const MiniHeader = ({ onTutorialAdded }: MiniHeaderProps) => {
         </div>
       </div>
       <QRCodePopup isOpen={showQRCode} onClose={handleQRCodeClose} />
+      <TutorialDialog isOpen={showTutorial} onClose={() => setShowTutorial(false)} videoUrl={tutorialUrl} />
     </div>
   );
 };

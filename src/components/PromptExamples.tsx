@@ -1,61 +1,52 @@
 
-import { useState } from 'react';
-import { Search, Copy } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
-const EXAMPLE_PROMPTS = [
+// Sample prompts data
+const examplePrompts = [
   {
     id: 1,
-    title: "Atendimento ao Cliente",
-    prompt: "Você é um agente de atendimento ao cliente para a Chatify. Responda de forma cordial e prestativa."
+    title: "Sugestão para e-mail marketing",
+    content: "Gere 5 linhas de assunto atrativas para um e-mail marketing sobre um novo curso de programação para iniciantes. O curso custa R$297 com desconto de pré-lançamento (preço normal R$497). O público-alvo são pessoas sem experiência em tecnologia que querem mudar de carreira."
   },
   {
     id: 2,
-    title: "Suporte Técnico",
-    prompt: "Você é um especialista técnico que ajuda usuários a resolver problemas com a plataforma Chatify."
+    title: "Ideias para post no Instagram",
+    content: "Crie 3 legendas para um post no Instagram de uma loja de roupas femininas que está lançando uma coleção de verão. Inclua hashtags relevantes e uma chamada para ação."
   },
   {
     id: 3,
-    title: "Vendas",
-    prompt: "Você é um consultor de vendas da Chatify. Forneça informações sobre nossos planos e ajude o cliente a escolher o melhor para suas necessidades."
+    title: "Roteiro para vídeo curto",
+    content: "Escreva um roteiro de 30 segundos para um vídeo explicando os benefícios de uma aplicação de meditação. O tom deve ser calmo e acolhedor. O aplicativo oferece meditações guiadas, sons relaxantes e histórias para dormir."
   },
   {
     id: 4,
-    title: "FAQ Bot",
-    prompt: "Você é um bot de FAQ que responde perguntas frequentes sobre a plataforma Chatify com respostas curtas e diretas."
+    title: "Perguntas para enquete",
+    content: "Crie 5 perguntas interessantes para uma enquete que vou postar no meu canal de tecnologia. Estou querendo entender melhor os interesses dos meus seguidores sobre inteligência artificial e suas aplicações no dia a dia."
   },
   {
     id: 5,
-    title: "Assistente de Onboarding",
-    prompt: "Você é um assistente de onboarding que guia novos usuários pelos primeiros passos na plataforma Chatify."
+    title: "Texto para página de vendas",
+    content: "Desenvolva a seção 'Sobre Nós' para a página de vendas de uma startup que oferece consultorias de marketing digital para pequenas empresas. Destaque a experiência da equipe e os resultados que já entregaram para outros clientes."
   },
   {
     id: 6,
-    title: "Assistente de Marketing",
-    prompt: "Você é um especialista em marketing digital que oferece dicas e estratégias para promover negócios usando o Chatify."
+    title: "Sugestões de melhorias UX",
+    content: "Analise os seguintes problemas em um aplicativo de delivery de comida e sugira melhorias específicas para a experiência do usuário: tempo de carregamento lento, muitos passos para finalizar um pedido, e dificuldade para encontrar restaurantes específicos."
   },
   {
     id: 7,
-    title: "Especialista em Integração",
-    prompt: "Você é um especialista técnico em integrações do Chatify com outras plataformas como CRMs e ERPs."
+    title: "Resposta para reclamação",
+    content: "Escreva uma resposta para um cliente insatisfeito que deixou a seguinte avaliação: 'Produto chegou com atraso e a embalagem estava danificada. Muito decepcionado com o serviço, não recomendo.' O seu objetivo é resolver o problema e recuperar a confiança do cliente."
   },
   {
     id: 8,
-    title: "Agente de Retenção",
-    prompt: "Você é um agente de retenção do Chatify. Seu objetivo é entender por que o cliente quer cancelar e oferecer soluções para manter o cliente."
-  },
-  {
-    id: 9,
-    title: "Assistente de Criação de Conteúdo",
-    prompt: "Você é um assistente que ajuda a criar conteúdo engajante para chatbots no Chatify."
-  },
-  {
-    id: 10,
-    title: "Consultor de IA",
-    prompt: "Você é um consultor especializado em inteligência artificial, explicando como a IA do Chatify funciona de maneira acessível."
+    title: "Plano de conteúdo",
+    content: "Crie um plano de conteúdo com 10 temas para artigos sobre finanças pessoais voltados para jovens adultos que estão começando a investir. Para cada tema, forneça um título atrativo e uma breve descrição do que o artigo deve abordar."
   }
 ];
 
@@ -65,20 +56,24 @@ type PromptExamplesProps = {
 
 const PromptExamples = ({ onSelectPrompt }: PromptExamplesProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { toast } = useToast();
+  const [filteredPrompts, setFilteredPrompts] = useState(examplePrompts);
+  const isMobile = useIsMobile();
 
-  const filteredPrompts = EXAMPLE_PROMPTS.filter(prompt =>
-    prompt.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    prompt.prompt.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredPrompts(examplePrompts);
+    } else {
+      const filtered = examplePrompts.filter(
+        prompt => 
+          prompt.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+          prompt.content.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredPrompts(filtered);
+    }
+  }, [searchTerm]);
 
-  const handleCopyPrompt = (prompt: string) => {
-    navigator.clipboard.writeText(prompt);
-    toast({
-      title: "Prompt copiado!",
-      description: "O prompt foi copiado para a área de transferência.",
-      duration: 2000,
-    });
+  const handleUsePrompt = (content: string) => {
+    onSelectPrompt(content);
   };
 
   return (
@@ -99,34 +94,27 @@ const PromptExamples = ({ onSelectPrompt }: PromptExamplesProps) => {
         <div className="space-y-4 p-4">
           {filteredPrompts.map((prompt) => (
             <div 
-              key={prompt.id}
-              className="bg-accent rounded-lg p-3 hover:bg-accent/80 transition-colors cursor-pointer group"
+              key={prompt.id} 
+              className="border border-gray-200 rounded-lg p-3 hover:border-primary/50 transition-colors"
             >
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-medium text-primary">{prompt.title}</h3>
-                <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0"
-                    onClick={() => handleCopyPrompt(prompt.prompt)}
-                  >
-                    <Copy className="h-3.5 w-3.5" />
-                    <span className="sr-only">Copiar</span>
-                  </Button>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600 line-clamp-3">{prompt.prompt}</p>
-              <Button
-                variant="link"
-                size="sm"
-                className="mt-2 h-auto p-0 text-secondary"
-                onClick={() => onSelectPrompt(prompt.prompt)}
+              <h3 className="font-medium text-sm text-gray-900 mb-1">{prompt.title}</h3>
+              <p className="text-xs text-gray-500 line-clamp-2 mb-2">{prompt.content}</p>
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="w-full text-xs"
+                onClick={() => handleUsePrompt(prompt.content)}
               >
-                Usar este prompt
+                {isMobile ? "Usar" : "Usar este prompt"}
               </Button>
             </div>
           ))}
+          
+          {filteredPrompts.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              <p>Nenhum prompt encontrado com "{searchTerm}"</p>
+            </div>
+          )}
         </div>
       </ScrollArea>
     </div>
